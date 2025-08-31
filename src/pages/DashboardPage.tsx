@@ -1,7 +1,19 @@
 // src/pages/DashboardPage.tsx
+
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import accountService, { type Account } from "../services/accountService";
+
+// Importa los componentes de Material UI
+import {
+  Container,
+  Typography,
+  CircularProgress,
+  Box,
+  Card,
+  CardContent,
+  Button,
+} from "@mui/material";
 
 const DashboardPage: React.FC = () => {
   const [accounts, setAccounts] = useState<Account[]>([]);
@@ -33,64 +45,71 @@ const DashboardPage: React.FC = () => {
     fetchAccounts();
   }, []);
 
-  const handleViewTransactions = (accountId: number) => {
-    navigate(`/transactions/${accountId}`);
+  const handleViewTransactions = (accountId: number, accountNumber: string) => {
+    navigate(`/transactions/${accountId}`, { state: { accountNumber } });
   };
 
   if (loading) {
-    return <div>Cargando cuentas...</div>;
+    return (
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          height: "80vh",
+        }}
+      >
+        <CircularProgress />
+      </Box>
+    );
   }
 
   if (error) {
-    return <div>{error}</div>;
+    return (
+      <Container maxWidth="sm" sx={{ mt: 4 }}>
+        <Typography color="error">{error}</Typography>
+      </Container>
+    );
   }
 
   return (
-    <div style={{ padding: "20px", maxWidth: "800px", margin: "auto" }}>
-      <h1>Mis Cuentas Bancarias</h1>
+    <Container maxWidth="md" sx={{ mt: 4 }}>
+      <Typography variant="h4" component="h1" gutterBottom>
+        Mis Cuentas Bancarias
+      </Typography>
       {accounts.length > 0 ? (
-        <ul>
+        <Box>
           {accounts.map((account) => (
-            <li
-              key={account.id}
-              style={{
-                marginBottom: "20px",
-                padding: "15px",
-                border: "1px solid #ccc",
-                borderRadius: "8px",
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-              }}
-            >
-              <div>
-                <p>
-                  <strong>Número de Cuenta:</strong> {account.accountNumber}
-                </p>
-                <p>
-                  <strong>Balance:</strong> ${account.balance.toFixed(2)}
-                </p>
-              </div>
-              <button
-                onClick={() => handleViewTransactions(account.id)}
-                style={{
-                  padding: "8px 16px",
-                  cursor: "pointer",
-                  borderRadius: "4px",
-                  border: "1px solid #007bff",
-                  background: "#007bff",
-                  color: "#fff",
+            <Card key={account.id} sx={{ mb: 2 }}>
+              <CardContent
+                sx={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
                 }}
               >
-                Ver Movimientos
-              </button>
-            </li>
+                <Box>
+                  <Typography variant="h6">
+                    Número de Cuenta: {account.accountNumber}
+                  </Typography>
+                  <Typography variant="body1" color="text.secondary">
+                    Balance: ${account.balance.toFixed(2)}
+                  </Typography>
+                </Box>
+                <Button
+                  variant="contained"
+                  onClick={() => handleViewTransactions(account.id, account.accountNumber)}
+                >
+                  Ver Movimientos
+                </Button>
+              </CardContent>
+            </Card>
           ))}
-        </ul>
+        </Box>
       ) : (
-        <p>No hay cuentas disponibles.</p>
+        <Typography variant="body1">No tienes cuentas asociadas.</Typography>
       )}
-    </div>
+    </Container>
   );
 };
 

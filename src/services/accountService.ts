@@ -1,8 +1,9 @@
+// src/services/accountService.ts
+
 import axios from "axios";
 
 const API_URL = "https://localhost:7115/api/accounts";
 
-// Debes exportar la interfaz para que sea visible desde otros archivos.
 export interface Account {
   id: number;
   accountNumber: string;

@@ -5,12 +5,12 @@ import axios from "axios";
 const API_URL = "https://localhost:7115/api/transactions";
 
 export interface Transaction {
-    id: number;
-    amount: number;
-    transactionDate: string;
-    description: string;
-    sourceAccountId: number;
-    destinationAccountId: number;
+  id: number;
+  amount: number;
+  transactionDate: string;
+  description: string;
+  sourceAccountId: number;
+  destinationAccountId: number;
 }
 
 interface TransferRequest {
@@ -20,7 +20,9 @@ interface TransferRequest {
   description: string;
 }
 
-const getTransactionsByAccountId = async (accountId: number): Promise<Transaction[]> => {
+const getTransactionsByAccountId = async (
+  accountId: number
+): Promise<Transaction[]> => {
   try {
     const response = await axios.get<Transaction[]>(`${API_URL}/${accountId}`);
     return response.data;
@@ -31,13 +33,13 @@ const getTransactionsByAccountId = async (accountId: number): Promise<Transactio
 };
 
 const transferFunds = async (data: TransferRequest): Promise<any> => {
-    try {
-        const response = await axios.post(`${API_URL}/transfer`, data);
-        return response.data;
-    } catch (error) {
-        console.error("Error al transferir fondos:", error);
-        throw error;
-    }
+  try {
+    const response = await axios.post(`${API_URL}/transfer`, data);
+    return response.data;
+  } catch (error) {
+    console.error("Error al transferir fondos:", error);
+    throw error;
+  }
 };
 
 const transactionService = {

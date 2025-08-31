@@ -1,7 +1,8 @@
 // src/components/NavBar.tsx
 
 import React, { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import { AppBar, Toolbar, Typography, Button, Box } from "@mui/material";
 
 const NavBar: React.FC = () => {
   const navigate = useNavigate();
@@ -21,43 +22,27 @@ const NavBar: React.FC = () => {
   };
 
   return (
-    <nav
-      style={{
-        background: "#333",
-        padding: "1rem",
-        marginBottom: "2rem",
-        color: "#fff",
-        display: "flex",
-        justifyContent: "space-between",
-        alignItems: "center",
-      }}
-    >
-      <div style={{ display: "flex", gap: "20px" }}>
-        <Link to="/dashboard" style={{ color: "#fff", textDecoration: "none" }}>
-          Dashboard
-        </Link>
-        <Link to="/transfer" style={{ color: "#fff", textDecoration: "none" }}>
-          Transferir
-        </Link>
-      </div>
+    <AppBar position="static">
+      <Toolbar>
+        <Box sx={{ flexGrow: 1, display: "flex", gap: 2 }}>
+          <Button color="inherit" onClick={() => navigate("/dashboard")}>
+            Dashboard
+          </Button>
+          <Button color="inherit" onClick={() => navigate("/transfer")}>
+            Transferir
+          </Button>
+        </Box>
 
-      <div style={{ display: "flex", alignItems: "center", gap: "20px" }}>
-        {clientName && <span>Hola, {clientName}</span>}
-        <button
-          onClick={handleLogout}
-          style={{
-            background: "none",
-            border: "1px solid #fff",
-            color: "#fff",
-            padding: "8px 16px",
-            cursor: "pointer",
-            borderRadius: "4px",
-          }}
-        >
-          Cerrar Sesión
-        </button>
-      </div>
-    </nav>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+          {clientName && (
+            <Typography variant="body1">Hola, {clientName}</Typography>
+          )}
+          <Button color="inherit" onClick={handleLogout}>
+            Cerrar Sesión
+          </Button>
+        </Box>
+      </Toolbar>
+    </AppBar>
   );
 };
 

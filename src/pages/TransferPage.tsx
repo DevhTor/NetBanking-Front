@@ -1,8 +1,20 @@
 // src/pages/TransferPage.tsx
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, type FormEvent } from "react";
 import accountService, { type Account } from "../services/accountService";
-import transactionService from "../services/transactionService"; // Crearemos este servicio
+import transactionService from "../services/transactionService";
+import {
+  Box,
+  Container,
+  Typography,
+  Card,
+  CardContent,
+  TextField,
+  Button,
+  CircularProgress,
+  Alert,
+  MenuItem,
+} from "@mui/material";
 
 const TransferPage: React.FC = () => {
   const [accounts, setAccounts] = useState<Account[]>([]);
@@ -11,17 +23,16 @@ const TransferPage: React.FC = () => {
   const [transferStatus, setTransferStatus] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     sourceAccountId: "",
-    destinationAccountNumber: "", // Usaremos el número de cuenta en el frontend
+    destinationAccountNumber: "",
     amount: "",
     description: "",
   });
 
-  // Fetch accounts for the logged-in client
   useEffect(() => {
     const fetchAccounts = async () => {
       try {
         const user = JSON.parse(localStorage.getItem("user") || "{}");
-        const clientId = user.clientId; // The ID of the logged-in client
+        const clientId = user.clientId;
 
         if (!clientId) {
           throw new Error("No se pudo encontrar el ID del cliente.");
@@ -42,127 +53,124 @@ const TransferPage: React.FC = () => {
   }, []);
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setTransferStatus("Transfiriendo fondos...");
-    setError(null);
+  const handleSelectChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
 
-    // Find the destination account ID from the accounts list
-    // You might need to add a new endpoint to your API to get a destination account by its number
-    // For now, let's assume we can find it on the client side if the number is known.
-    // In a real application, you should call a backend endpoint to validate the destination account number.
+  const handleSubmit = async (event: FormEvent) => {
+    event.preventDefault();
+    setTransferStatus(null);
+    setError(null);
+    setLoading(true);
 
     try {
-      const transferData = {
+      const payload = {
         sourceAccountId: parseInt(formData.sourceAccountId),
         destinationAccountNumber: formData.destinationAccountNumber,
         amount: parseFloat(formData.amount),
         description: formData.description,
       };
-      await transactionService.transferFunds(transferData);
+
+      await transactionService.transferFunds(payload);
       setTransferStatus("Transferencia realizada con éxito.");
       setFormData({
         sourceAccountId: "",
         destinationAccountNumber: "",
         amount: "",
         description: "",
-      }); // Clear form
+      });
     } catch (err) {
       setError(
-        "Error en la transferencia. Verifica los datos e inténtalo de nuevo."
+        "Error en la transferencia. Por favor, revisa los datos e inténtalo de nuevo."
       );
-      setTransferStatus(null);
+    } finally {
+      setLoading(false);
     }
   };
 
-  if (loading) {
-    return <div>Cargando cuentas...</div>;
-  }
-
-  if (error) {
-    return <div>{error}</div>;
-  }
-
   return (
-    <div style={{ padding: "20px", maxWidth: "800px", margin: "auto" }}>
-      <h1>Realizar Transferencia</h1>
-      {transferStatus && <p style={{ color: "green" }}>{transferStatus}</p>}
-      <form
-        onSubmit={handleSubmit}
-        style={{ display: "flex", flexDirection: "column", gap: "15px" }}
-      >
-        <div>
-          <label htmlFor="sourceAccountId">Cuenta de Origen:</label>
-          <select
-            id="sourceAccountId"
-            name="sourceAccountId"
-            value={formData.sourceAccountId}
-            onChange={handleChange}
-            required
-            style={{ width: "100%", padding: "8px" }}
-          >
-            <option value="">Selecciona una cuenta</option>
-            {accounts.map((account) => (
-              <option key={account.id} value={account.id}>
-                {account.accountNumber} - ${account.balance.toFixed(2)}
-              </option>
-            ))}
-          </select>
-        </div>
-        <div>
-          <label htmlFor="destinationAccountNumber">
-            Número de Cuenta de Destino:
-          </label>
-          <input
-            id="destinationAccountNumber"
-            type="text"
-            name="destinationAccountNumber"
-            value={formData.destinationAccountNumber}
-            onChange={handleChange}
-            required
-            style={{ width: "100%", padding: "8px" }}
-          />
-        </div>
-        <div>
-          <label htmlFor="amount">Monto:</label>
-          <input
-            id="amount"
-            type="number"
-            name="amount"
-            value={formData.amount}
-            onChange={handleChange}
-            required
-            min="0.01"
-            step="0.01"
-            style={{ width: "100%", padding: "8px" }}
-          />
-        </div>
-        <div>
-          <label htmlFor="description">Descripción:</label>
-          <input
-            id="description"
-            type="text"
-            name="description"
-            value={formData.description}
-            onChange={handleChange}
-            required
-            style={{ width: "100%", padding: "8px" }}
-          />
-        </div>
-        <button
-          type="submit"
-          style={{ padding: "10px 20px", cursor: "pointer" }}
-        >
-          Transferir
-        </button>
-      </form>
-    </div>
+    <Container maxWidth="sm" sx={{ mt: 4 }}>
+      <Typography variant="h4" component="h1" gutterBottom>
+        Realizar Transferencia
+      </Typography>
+      <Card>
+        <CardContent>
+          {loading && <CircularProgress />}
+          {error && <Alert severity="error">{error}</Alert>}
+          {transferStatus && <Alert severity="success">{transferStatus}</Alert>}
+          {!loading && accounts.length > 0 ? (
+            <form onSubmit={handleSubmit}>
+              <Box mb={2}>
+                <TextField
+                  fullWidth
+                  select
+                  label="Selecciona la cuenta de origen"
+                  name="sourceAccountId"
+                  value={formData.sourceAccountId}
+                  onChange={handleSelectChange}
+                  required
+                >
+                  {accounts.map((account) => (
+                    <MenuItem key={account.id} value={account.id}>
+                      {account.accountNumber} - ${account.balance.toFixed(2)}
+                    </MenuItem>
+                  ))}
+                </TextField>
+              </Box>
+              <Box mb={2}>
+                <TextField
+                  fullWidth
+                  label="Número de Cuenta de Destino"
+                  name="destinationAccountNumber"
+                  value={formData.destinationAccountNumber}
+                  onChange={handleChange}
+                  required
+                />
+              </Box>
+              <Box mb={2}>
+                <TextField
+                  fullWidth
+                  label="Monto"
+                  type="number"
+                  name="amount"
+                  value={formData.amount}
+                  onChange={handleChange}
+                  required
+                  inputProps={{ min: "0.01", step: "0.01" }}
+                />
+              </Box>
+              <Box mb={2}>
+                <TextField
+                  fullWidth
+                  label="Descripción"
+                  name="description"
+                  value={formData.description}
+                  onChange={handleChange}
+                  required
+                />
+              </Box>
+              <Button
+                type="submit"
+                variant="contained"
+                color="primary"
+                fullWidth
+              >
+                Transferir
+              </Button>
+            </form>
+          ) : (
+            <Typography>No se pudieron cargar las cuentas.</Typography>
+          )}
+        </CardContent>
+      </Card>
+    </Container>
   );
 };
 

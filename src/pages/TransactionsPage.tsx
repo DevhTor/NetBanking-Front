@@ -1,13 +1,28 @@
 // src/pages/TransactionsPage.tsx
 
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useLocation } from "react-router-dom";
 import transactionService, {
   type Transaction,
 } from "../services/transactionService";
+import {
+  Container,
+  Typography,
+  CircularProgress,
+  Box,
+  Card,
+  CardContent,
+  List,
+  ListItem,
+  ListItemText,
+} from "@mui/material";
 
 const TransactionsPage: React.FC = () => {
   const { accountId } = useParams<{ accountId: string }>();
+  const location = useLocation();
+  const accountNumber = (location.state as { accountNumber: string })
+    ?.accountNumber;
+
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -36,45 +51,56 @@ const TransactionsPage: React.FC = () => {
   }, [accountId]);
 
   if (loading) {
-    return <div>Cargando transacciones...</div>;
+    return (
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          height: "80vh",
+        }}
+      >
+        <CircularProgress />
+      </Box>
+    );
   }
 
   if (error) {
-    return <div>{error}</div>;
+    return (
+      <Container maxWidth="sm" sx={{ mt: 4 }}>
+        <Typography color="error">{error}</Typography>
+      </Container>
+    );
   }
 
   return (
-    <div style={{ padding: "20px", maxWidth: "800px", margin: "auto" }}>
-      <h1>Movimientos de la Cuenta {accountId}</h1>
-      {transactions.length > 0 ? (
-        <ul>
-          {transactions.map((transaction) => (
-            <li
-              key={transaction.id}
-              style={{
-                marginBottom: "10px",
-                padding: "10px",
-                border: "1px solid #eee",
-                borderRadius: "4px",
-              }}
-            >
-              <p>
-                <strong>Monto:</strong> ${transaction.amount.toFixed(2)}
-              </p>
-              <p>
-                <strong>Fecha:</strong>{" "}
-                {new Date(transaction.transactionDate).toLocaleDateString()}
-              </p>
-              <p>
-                <strong>Descripción:</strong> {transaction.description}
-              </p>
-            </li>
-          ))}
-        </ul>
-      ) : (
-        <p>No hay transacciones para esta cuenta.</p>
-      )}
-    </div>
+    <Container maxWidth="md" sx={{ mt: 4 }}>
+      <Typography variant="h4" component="h1" gutterBottom>
+        Movimientos de la Cuenta #{accountNumber}
+      </Typography>
+      <Card>
+        <CardContent>
+          {transactions.length > 0 ? (
+            <List>
+              {transactions.map((transaction) => (
+                <ListItem key={transaction.id} divider>
+                  <ListItemText
+                    primary={`Monto: $${transaction.amount.toFixed(2)}`}
+                    secondary={`Fecha: ${new Date(
+                      transaction.transactionDate
+                    ).toLocaleDateString()} | Descripción: ${
+                      transaction.description
+                    }`}
+                  />
+                </ListItem>
+              ))}
+            </List>
+          ) : (
+            <Typography>No hay transacciones para esta cuenta.</Typography>
+          )}
+        </CardContent>
+      </Card>
+    </Container>
   );
 };
 
