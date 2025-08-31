@@ -86,11 +86,28 @@ const TransactionsPage: React.FC = () => {
                 <ListItem key={transaction.id} divider>
                   <ListItemText
                     primary={`Monto: $${transaction.amount.toFixed(2)}`}
-                    secondary={`Fecha: ${new Date(
-                      transaction.transactionDate
-                    ).toLocaleDateString()} | Descripción: ${
-                      transaction.description
-                    }`}
+                    secondary={
+                      <React.Fragment>
+                        <Typography
+                          component="span"
+                          variant="body2"
+                          color="text.secondary"
+                        >
+                          Fecha:{" "}
+                          {new Date(
+                            transaction.transactionDate
+                          ).toLocaleDateString()}
+                        </Typography>
+                        <br />
+                        <Typography
+                          component="span"
+                          variant="body2"
+                          color="text.secondary"
+                        >
+                          Descripción: {transaction.description}
+                        </Typography>
+                      </React.Fragment>
+                    }
                   />
                 </ListItem>
               ))}
