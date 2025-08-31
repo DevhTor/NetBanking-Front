@@ -36,9 +36,6 @@ const NavBar: React.FC = () => {
         <Link to="/dashboard" style={{ color: "#fff", textDecoration: "none" }}>
           Dashboard
         </Link>
-        <Link to="/transactions" style={{ color: "#fff", textDecoration: "none" }}>
-          Transacciones
-        </Link>
         <Link to="/transfer" style={{ color: "#fff", textDecoration: "none" }}>
           Transferir
         </Link>

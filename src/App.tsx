@@ -5,6 +5,7 @@ import LoginPage from "./pages/LoginPage";
 import DashboardPage from "./pages/DashboardPage";
 import ProtectedRoute from "./components/ProtectedRoute"; // Importa ProtectedRoute
 import NavBar from "./components/NavBar"; // Importa el menú de navegación
+import TransferPage from "./pages/TransferPage";
 import TransactionsPage from "./pages/TransactionsPage";
 
 const App: React.FC = () => {
@@ -27,7 +28,12 @@ const App: React.FC = () => {
         >
           {/* El Dashboard se anida aquí. Si el ProtectedRoute falla, esta ruta no se renderizará. */}
           <Route path="dashboard" element={<DashboardPage />} />
-          <Route path="transactions" element={<TransactionsPage />} />
+          <Route path="transfer" element={<TransferPage />} />
+          <Route
+            path="/transactions/:accountId"
+            element={<TransactionsPage />}
+          />{" "}
+          {/* Ruta dinámica */}
         </Route>
       </Routes>
     </BrowserRouter>

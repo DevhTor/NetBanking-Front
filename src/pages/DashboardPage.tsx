@@ -1,25 +1,24 @@
 // src/pages/DashboardPage.tsx
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import accountService, { type Account } from "../services/accountService";
 
 const DashboardPage: React.FC = () => {
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchAccounts = async () => {
       try {
-        // Obtén la información del usuario del almacenamiento local
         const user = JSON.parse(localStorage.getItem("user") || "{}");
-        // Asume que la información del usuario contiene el clientId
         const clientId = user.clientId;
 
         if (!clientId) {
           throw new Error("No se pudo encontrar el ID del cliente.");
         }
 
-        // Llama a la API para obtener las cuentas del cliente
         const clientAccounts = await accountService.getAccountsByClientId(
           clientId
         );
@@ -33,6 +32,10 @@ const DashboardPage: React.FC = () => {
 
     fetchAccounts();
   }, []);
+
+  const handleViewTransactions = (accountId: number) => {
+    navigate(`/transactions/${accountId}`);
+  };
 
   if (loading) {
     return <div>Cargando cuentas...</div>;
@@ -55,19 +58,37 @@ const DashboardPage: React.FC = () => {
                 padding: "15px",
                 border: "1px solid #ccc",
                 borderRadius: "8px",
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
               }}
             >
-              <p>
-                <strong>Número de Cuenta:</strong> {account.accountNumber}
-              </p>
-              <p>
-                <strong>Balance:</strong> ${account.balance.toFixed(2)}
-              </p>
+              <div>
+                <p>
+                  <strong>Número de Cuenta:</strong> {account.accountNumber}
+                </p>
+                <p>
+                  <strong>Balance:</strong> ${account.balance.toFixed(2)}
+                </p>
+              </div>
+              <button
+                onClick={() => handleViewTransactions(account.id)}
+                style={{
+                  padding: "8px 16px",
+                  cursor: "pointer",
+                  borderRadius: "4px",
+                  border: "1px solid #007bff",
+                  background: "#007bff",
+                  color: "#fff",
+                }}
+              >
+                Ver Movimientos
+              </button>
             </li>
           ))}
         </ul>
       ) : (
-        <p>No tienes cuentas asociadas.</p>
+        <p>No hay cuentas disponibles.</p>
       )}
     </div>
   );
