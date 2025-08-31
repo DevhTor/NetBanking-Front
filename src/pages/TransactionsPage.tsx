@@ -39,7 +39,16 @@ const TransactionsPage: React.FC = () => {
         const data = await transactionService.getTransactionsByAccountId(
           parseInt(accountId)
         );
-        setTransactions(data);
+
+        // Ordenar las transacciones por fecha en orden descendente
+        const sortedTransactions = [...data].sort((a, b) => {
+          return (
+            new Date(b.transactionDate).getTime() -
+            new Date(a.transactionDate).getTime()
+          );
+        });
+
+        setTransactions(sortedTransactions);
       } catch (err) {
         setError("No se pudieron cargar las transacciones.");
       } finally {
@@ -82,35 +91,42 @@ const TransactionsPage: React.FC = () => {
         <CardContent>
           {transactions.length > 0 ? (
             <List>
-              {transactions.map((transaction) => (
-                <ListItem key={transaction.id} divider>
-                  <ListItemText
-                    primary={`Monto: $${transaction.amount.toFixed(2)}`}
-                    secondary={
-                      <React.Fragment>
-                        <Typography
-                          component="span"
-                          variant="body2"
-                          color="text.secondary"
-                        >
-                          Fecha:{" "}
-                          {new Date(
-                            transaction.transactionDate
-                          ).toLocaleDateString()}
-                        </Typography>
-                        <br />
-                        <Typography
-                          component="span"
-                          variant="body2"
-                          color="text.secondary"
-                        >
-                          Descripción: {transaction.description}
-                        </Typography>
-                      </React.Fragment>
-                    }
-                  />
-                </ListItem>
-              ))}
+              {transactions.map((transaction) => {
+                const isDebit =
+                  transaction.sourceAccountId === parseInt(accountId ?? "0");
+                const sign = isDebit ? "-" : "+";
+                const displayAmount = transaction.amount;
+
+                return (
+                  <ListItem key={transaction.id} divider>
+                    <ListItemText
+                      primary={`Monto: ${sign}$${displayAmount.toFixed(2)}`}
+                      secondary={
+                        <React.Fragment>
+                          <Typography
+                            component="span"
+                            variant="body2"
+                            color="text.secondary"
+                          >
+                            Fecha:{" "}
+                            {new Date(
+                              transaction.transactionDate
+                            ).toLocaleDateString()}
+                          </Typography>
+                          <br />
+                          <Typography
+                            component="span"
+                            variant="body2"
+                            color="text.secondary"
+                          >
+                            Descripción: {transaction.description}
+                          </Typography>
+                        </React.Fragment>
+                      }
+                    />
+                  </ListItem>
+                );
+              })}
             </List>
           ) : (
             <Typography>No hay transacciones para esta cuenta.</Typography>
