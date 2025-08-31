@@ -9,6 +9,7 @@ interface ILoginRequest {
 interface ILoginResponse {
   token: string;
   clientId: number;
+  clientName: string;
   // Add other user data returned by your API here, if any
 }
 

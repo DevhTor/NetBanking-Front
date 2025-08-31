@@ -1,14 +1,22 @@
 // src/components/NavBar.tsx
-import React from "react";
-import { Link, useNavigate } from "react-router-dom"; // Importa 'useNavigate'
+
+import React, { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
 
 const NavBar: React.FC = () => {
   const navigate = useNavigate();
+  const [clientName, setClientName] = useState<string | null>(null);
+
+  useEffect(() => {
+    const user = localStorage.getItem("user");
+    if (user) {
+      const userData = JSON.parse(user);
+      setClientName(userData.clientName);
+    }
+  }, []);
 
   const handleLogout = () => {
-    // Elimina el usuario del almacenamiento local
     localStorage.removeItem("user");
-    // Redirige al usuario a la página de inicio de sesión
     navigate("/login");
   };
 
@@ -20,18 +28,15 @@ const NavBar: React.FC = () => {
         marginBottom: "2rem",
         color: "#fff",
         display: "flex",
-        justifyContent: "space-between", // Alinea los elementos a los extremos
-        alignItems: "center", // Centra verticalmente los elementos
+        justifyContent: "space-between",
+        alignItems: "center",
       }}
     >
       <div style={{ display: "flex", gap: "20px" }}>
         <Link to="/dashboard" style={{ color: "#fff", textDecoration: "none" }}>
           Dashboard
         </Link>
-        <Link
-          to="/transactions"
-          style={{ color: "#fff", textDecoration: "none" }}
-        >
+        <Link to="/transactions" style={{ color: "#fff", textDecoration: "none" }}>
           Transacciones
         </Link>
         <Link to="/transfer" style={{ color: "#fff", textDecoration: "none" }}>
@@ -39,19 +44,22 @@ const NavBar: React.FC = () => {
         </Link>
       </div>
 
-      <button
-        onClick={handleLogout}
-        style={{
-          background: "none",
-          border: "1px solid #fff",
-          color: "#fff",
-          padding: "8px 16px",
-          cursor: "pointer",
-          borderRadius: "4px",
-        }}
-      >
-        Cerrar Sesión
-      </button>
+      <div style={{ display: "flex", alignItems: "center", gap: "20px" }}>
+        {clientName && <span>Hola, {clientName}</span>}
+        <button
+          onClick={handleLogout}
+          style={{
+            background: "none",
+            border: "1px solid #fff",
+            color: "#fff",
+            padding: "8px 16px",
+            cursor: "pointer",
+            borderRadius: "4px",
+          }}
+        >
+          Cerrar Sesión
+        </button>
+      </div>
     </nav>
   );
 };
